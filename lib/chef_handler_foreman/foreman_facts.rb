@@ -1,15 +1,15 @@
-#This program is free software: you can redistribute it and/or modify
-#it under the terms of the GNU General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#This program is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-#You should have received a copy of the GNU General Public License
-#along with this program.  If not, see <http://www.gnu.org/licenses/>
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 require 'chef/handler'
 require 'digest/md5'
@@ -26,7 +26,6 @@ module ChefHandlerForeman
       send_attributes(prepare_facts)
     end
 
-
     private
 
     def prepare_facts
@@ -41,15 +40,15 @@ module ChefHandlerForeman
       release ||= node['platform_version']
 
       # operatingsystem and operatingsystemrelase are not needed since foreman_chef 0.1.3
-      { :name  => node.name.downcase,
-        :facts => plain_attributes.merge({
-                                             :environment            => node.chef_environment,
-                                             :chef_node_name         => node.name,
-                                             :operatingsystem        => normalize(os),
-                                             :operatingsystemrelease => release,
-                                             :_timestamp             => Time.now,
-                                             :_type                  => 'foreman_chef'
-                                         })
+      { name:  node.name.downcase,
+        facts: plain_attributes.merge(
+                                             environment:            node.chef_environment,
+                                             chef_node_name:         node.name,
+                                             operatingsystem:        normalize(os),
+                                             operatingsystemrelease: release,
+                                             _timestamp:             Time.now,
+                                             _type:                  'foreman_chef'
+                                           ),
       }
     end
 
@@ -68,7 +67,7 @@ module ChefHandlerForeman
     def plain_attributes
       # chef 10 attributes can be access by to_hash directly, chef 11 uses attributes method
       attributes = node.respond_to?(:attributes) ? node.attributes : node.to_hash
-      attributes = attributes.select { |key, value| @whitelist.include?(key) } if @whitelist
+      attributes = attributes.select { |key, _value| @whitelist.include?(key) } if @whitelist
       attrs = plainify(attributes.to_hash).flatten.inject(&:merge)
       verify_checksum(attrs) if @cache_file
       attrs
@@ -82,7 +81,7 @@ module ChefHandlerForeman
         elsif value.is_a?(Array)
           result.push plainify(array_to_hash(value), get_key(key, prefix))
         else
-          new                       = {}
+          new = {}
           full_key = get_key(key, prefix)
           if @blacklist.nil? || !@blacklist.any? { |black_key| full_key.include?(black_key) }
             new[full_key] = value
@@ -104,17 +103,17 @@ module ChefHandlerForeman
     end
 
     def send_attributes(attributes)
-      if @cache_file and !@cache_expired
-        Chef::Log.info "No attributes have changed - not uploading to foreman"
+      if @cache_file && !@cache_expired
+        Chef::Log.info 'No attributes have changed - not uploading to foreman'
       elsif !attributes
-        Chef::Log.info "No attributes received, failed run - not uploading to foreman"
+        Chef::Log.info 'No attributes received, failed run - not uploading to foreman'
       else
         if uploader
           Chef::Log.info 'Sending attributes to foreman'
           Chef::Log.debug attributes.inspect
-          uploader.foreman_request('/api/hosts/facts', attributes, node.name)
+          uploader.foreman_request('api/hosts/facts', attributes, node.name)
         else
-          Chef::Log.error "No uploader registered for foreman facts, skipping facts upload"
+          Chef::Log.error 'No uploader registered for foreman facts, skipping facts upload'
         end
       end
     end

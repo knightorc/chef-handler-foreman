@@ -2,7 +2,7 @@ require 'json'
 
 module ChefHandlerForeman
   class ForemanEncFetcher < ::Chef::EventDispatch::Base
-    SUPPORTED_LEVELS = %w(default force_default normal override force_override automatic)
+    SUPPORTED_LEVELS = %w(default force_default normal override force_override automatic).freeze
 
     attr_accessor :uploader
 
@@ -14,12 +14,12 @@ module ChefHandlerForeman
 
     def node_load_completed(node)
       client_name = node.name
-      result = Chef::Config.foreman_uploader.foreman_request("/api/enc/#{client_name}", client_name, client_name, 'get')
+      result = Chef::Config.foreman_uploader.foreman_request("api/enc/#{client_name}", client_name, client_name, 'get')
       begin
         enc = JSON.parse(result.body)
       rescue => e
         Chef::Log.error "Foreman ENC could not be fetched because of #{e.class}: #{e.message}"
-	return false
+        return false
       end
 
       enc['parameters'].each do |parameter, value|

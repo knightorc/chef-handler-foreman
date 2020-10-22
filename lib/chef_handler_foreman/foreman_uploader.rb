@@ -1,15 +1,15 @@
-#This program is free software: you can redistribute it and/or modify
-#it under the terms of the GNU General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#This program is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-#You should have received a copy of the GNU General Public License
-#along with this program.  If not, see <http://www.gnu.org/licenses/>
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 require 'net/http'
 require 'net/https'
@@ -62,12 +62,12 @@ module ChefHandlerForeman
 
     def signature(request)
       case request
-        when Net::HTTP::Post, Net::HTTP::Patch, Net::HTTP::Put
-          sign_data(request.body)
-        when Net::HTTP::Get, Net::HTTP::Delete
-          sign_data(request['X-Foreman-Client'])
-        else
-          raise "Don't know how to sign #{req.class} requests"
+      when Net::HTTP::Post, Net::HTTP::Patch, Net::HTTP::Put
+        sign_data(request.body)
+      when Net::HTTP::Get, Net::HTTP::Delete
+        sign_data(request['X-Foreman-Client'])
+      else
+        raise "Don't know how to sign #{req.class} requests"
       end
     end
 
@@ -75,8 +75,7 @@ module ChefHandlerForeman
       hash_to_sign = Digest::SHA256.hexdigest(data)
       key = OpenSSL::PKey::RSA.new(File.read(options[:client_key]))
       # Base64.encode64 is adding \n in the string
-      signature = Base64.encode64(key.sign(OpenSSL::Digest::SHA256.new, hash_to_sign)).gsub("\n",'')
+      signature = Base64.encode64(key.sign(OpenSSL::Digest::SHA256.new, hash_to_sign)).gsub("\n", '')
     end
   end
 end
-

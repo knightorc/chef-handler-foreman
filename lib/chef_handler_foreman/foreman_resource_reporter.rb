@@ -18,13 +18,13 @@ module ChefHandlerForeman
     end
 
     def run_completed(node)
-      @status = "success"
+      @status = 'success'
       post_reporting_data
     end
 
     def run_failed(exception)
       @exception = exception
-      @status    = "failure"
+      @status    = 'failure'
       # If we failed before we received the run_started callback, there's not much we can do
       # in terms of reporting
       if @run_status
@@ -36,7 +36,6 @@ module ChefHandlerForeman
       super
       @all_resources.push @pending_update unless @pending_update.nil?
     end
-
 
     def resource_up_to_date(new_resource, action)
       @total_up_to_date += 1
@@ -68,7 +67,7 @@ module ChefHandlerForeman
       end
     end
 
-    def resource_bypassed(*args)
+    def resource_bypassed(*_args)
       @why_run = true
     end
 
@@ -78,63 +77,63 @@ module ChefHandlerForeman
         Chef::Log.info("Sending resource update report to foreman (run-id: #{@run_id})")
         Chef::Log.debug run_data.inspect
         begin
-          Chef::Log.debug("Sending data...")
+          Chef::Log.debug('Sending data...')
           if uploader
-            uploader.foreman_request('/api/reports', { "report" => run_data }, node_name)
+            uploader.foreman_request('api/reports', { 'report' => run_data }, node_name)
           else
-            Chef::Log.error "No uploader registered for foreman reporting, skipping report upload"
+            Chef::Log.error 'No uploader registered for foreman reporting, skipping report upload'
           end
         rescue => e
           Chef::Log.error "Sending failed with #{e.class} #{e.message}"
           Chef::Log.error e.backtrace.join("\n")
         end
       else
-        Chef::Log.debug("Reporting disabled, skipping report upload")
+        Chef::Log.debug('Reporting disabled, skipping report upload')
       end
     end
 
     def prepare_run_data
       run_data                = {}
-      run_data["host"]        = node_name.downcase
-      run_data["reported_at"] = end_time.to_s
-      run_data["status"]      = resources_per_status
+      run_data['host']        = node_name.downcase
+      run_data['reported_at'] = end_time.to_s
+      run_data['status']      = resources_per_status
 
-      run_data["metrics"] = {
-          "resources" => { "total" => @total_res_count },
-          "time"      => resources_per_time
+      run_data['metrics'] = {
+          'resources' => { 'total' => @total_res_count },
+          'time'      => resources_per_time,
       }
 
-      run_data["logs"] = filter_logs(resources_logs + [chef_log])
+      run_data['logs'] = filter_logs(resources_logs + [chef_log])
       run_data
     end
 
     def resources_per_status
       if Chef::Config.why_run
         {
-          "applied"         => 0,
-          "restarted"       => 0,
-          "failed"          => 0,
-          "failed_restarts" => 0,
-          "skipped"         => @total_skipped,
-          "pending"         => @total_updated + @total_restarted + @total_failed + @total_failed_restart
+          'applied'         => 0,
+          'restarted'       => 0,
+          'failed'          => 0,
+          'failed_restarts' => 0,
+          'skipped'         => @total_skipped,
+          'pending'         => @total_updated + @total_restarted + @total_failed + @total_failed_restart,
         }
       else
         {
-          "applied"         => @total_updated,
-          "restarted"       => @total_restarted,
-          "failed"          => @total_failed,
-          "failed_restarts" => @total_failed_restart,
-          "skipped"         => @total_skipped,
-          "pending"         => 0
+          'applied'         => @total_updated,
+          'restarted'       => @total_restarted,
+          'failed'          => @total_failed,
+          'failed_restarts' => @total_failed_restart,
+          'skipped'         => @total_skipped,
+          'pending'         => 0,
         }
       end
     end
 
     def resources_per_time
-      @run_status.all_resources.inject({}) do |memo, resource|
-        name, time = resource.resource_name.to_s, resource.elapsed_time || 0
+      @run_status.all_resources.each_with_object({}) do |resource, memo|
+        name = resource.resource_name.to_s
+        time = resource.elapsed_time || 0
         memo[name] = memo[name] ? memo[name] + time : time
-        memo
       end
     end
 
@@ -144,36 +143,36 @@ module ChefHandlerForeman
         message = action.is_a?(Array) ? action.first.to_s : action.to_s
         message = format_message(message, resource.new_resource)
         message += " (#{resource.exception.class} #{resource.exception.message})" unless resource.exception.nil?
-        level   =  resource_level(resource)
-        { "log" => {
-            "sources"  => { "source" => resource.new_resource.to_s },
-            "messages" => { "message" => message },
-            "level"    => level
+        level = resource_level(resource)
+        { 'log' => {
+            'sources'  => { 'source' => resource.new_resource.to_s },
+            'messages' => { 'message' => message },
+            'level'    => level,
         } }
       end
     end
 
     def format_message(message, resource)
       case resource.resource_name.to_s
-        when 'template', 'cookbook_file'
-          unless resource.diff.nil?
-            message += " with diff " + resource.diff.gsub('\\n', "\n")
-          end
-        when 'package'
-          message += " package in #{resource.version}" unless resource.version.nil?
-        else
-          message = resource.action.to_s
+      when 'template', 'cookbook_file'
+        unless resource.diff.nil?
+          message += ' with diff ' + resource.diff.gsub('\\n', "\n")
+        end
+      when 'package'
+        message += " package in #{resource.version}" unless resource.version.nil?
+      else
+        message = resource.action.to_s
       end
       message
     end
 
     def resource_level(resource)
-      if ! resource.exception.nil?
-        return 'err'
+      if !resource.exception.nil?
+        'err'
       elsif resource.new_resource.updated
-        return 'notice'
+        'notice'
       else
-        return 'debug'
+        'debug'
       end
     end
 
@@ -183,13 +182,13 @@ module ChefHandlerForeman
         level = 'notice'
       else
         message += " (#{exception.class} #{exception.message})"
-        level   = 'err'
+        level = 'err'
       end
 
-      { "log" => {
-          "sources"  => { "source" => 'Chef' },
-          "messages" => { "message" => message },
-          "level"    => level
+      { 'log' => {
+          'sources'  => { 'source' => 'Chef' },
+          'messages' => { 'message' => message },
+          'level'    => level,
       } }
     end
 
@@ -202,11 +201,10 @@ module ChefHandlerForeman
       if log_level == 'error'
         logs.select { |log| log['log']['level'] == 'err' }
       elsif log_level == 'notice'
-        logs.select { |log| ['err','notice'].include? log['log']['level'] }
+        logs.select { |log| %w(err notice).include? log['log']['level'] }
       else
         logs
       end
     end
-
   end
 end

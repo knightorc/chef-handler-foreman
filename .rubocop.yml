@@ -1,0 +1,30 @@
+AllCops:
+  Include:
+    - Berksfile
+    - Gemfile
+    - Rakefile
+    - '**/*.rb'
+  Exclude:
+    - vendor/**/*
+    - '**/files/**/*'
+    - '**/spec/**/*'
+
+Style/SymbolArray:
+  Enabled: false
+Lint/ParenthesesAsGroupedExpression:
+  Enabled: false
+Lint/AmbiguousBlockAssociation:
+  Enabled: false
+Naming/HeredocDelimiterNaming:
+  Enabled: false
+Style/MixinUsage:
+  Enabled: false
+Metrics/LineLength:
+  Enabled: false
+Metrics/MethodLength:
+  Max: 40
+Layout/AlignHash:
+  EnforcedHashRocketStyle: table
+  EnforcedColonStyle: table
+Layout/EndAlignment:
+  EnforcedStyleAlignWith: keyword

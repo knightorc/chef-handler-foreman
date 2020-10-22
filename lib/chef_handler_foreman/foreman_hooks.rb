@@ -15,13 +15,13 @@ module ChefHandlerForeman
 
     # Provide a chef-client cookbook friendly option
     def foreman_server_url(url)
-      foreman_server_options(:url => url)
+      foreman_server_options(url: url)
     end
 
     # {:url => '', ...}
-    def foreman_server_options(options={})
+    def foreman_server_options(options = {})
       options[:client_key] = client_key || '/etc/chef/client.pem' unless options[:client_key]
-      raise "No Foreman URL! Please provide a URL" unless options[:url]
+      raise 'No Foreman URL! Please provide a URL' unless options[:url]
       @foreman_uploader = ForemanUploader.new(options)
       # set uploader if handlers are already created
       @foreman_facts_handler.uploader = @foreman_uploader if @foreman_facts_handler
@@ -41,22 +41,22 @@ module ChefHandlerForeman
     def foreman_reports_upload(upload, mode = 1)
       if upload
         case mode
-          when 1
-            @foreman_reporter           = ForemanResourceReporter.new(nil)
-            @foreman_reporter.uploader  = @foreman_uploader
-            @foreman_reporter.log_level = @foreman_reports_log_level
-            if Chef::Config[:event_handlers].is_a?(Array)
-              Chef::Config[:event_handlers].push @foreman_reporter
-            else
-              Chef::Config[:event_handlers] = [@foreman_reporter]
-            end
-          when 2
-            @foreman_report_handler          = ForemanReporting.new
-            @foreman_report_handler.uploader = @foreman_uploader
-            report_handlers << @foreman_report_handler
-            exception_handlers << @foreman_report_handler
+        when 1
+          @foreman_reporter = ForemanResourceReporter.new(nil)
+          @foreman_reporter.uploader  = @foreman_uploader
+          @foreman_reporter.log_level = @foreman_reports_log_level
+          if Chef::Config[:event_handlers].is_a?(Array)
+            Chef::Config[:event_handlers].push @foreman_reporter
           else
-            raise ArgumentError, 'unknown mode: ' + mode.to_s
+            Chef::Config[:event_handlers] = [@foreman_reporter]
+          end
+        when 2
+          @foreman_report_handler = ForemanReporting.new
+          @foreman_report_handler.uploader = @foreman_uploader
+          report_handlers << @foreman_report_handler
+          exception_handlers << @foreman_report_handler
+        else
+          raise ArgumentError, 'unknown mode: ' + mode.to_s
         end
       end
     end

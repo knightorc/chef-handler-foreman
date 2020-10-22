@@ -1,3 +1,18 @@
+Version 0.2.3 (2020-10-22)
+
+* Fix literal '\n' to "\n" so  template/cookbook\_file output is converted to include a new line
+* Fix/Happen action :Symbol rather than Array of :Symbol
+
+Version 0.2.2 (2020-07-08)
+
+* Support Chef 15/16 clients using updated legacy type 2 way.
+* Fix double `/` in concatenated url
+* Since we're behind a smartproxy switch back to reports rather that config\_reports
+
+Version 0.2.1 ???
+
+Version 0.2.0 ???
+
 Version 0.1.2
 
 * compatibility with configuration via chef-client cookbook
